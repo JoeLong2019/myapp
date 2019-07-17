@@ -1,114 +1,85 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
-
-import React, {Fragment} from 'react';
+import React from "react";
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const App = () => {
-  return (
-    <Fragment>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Fragment>
-  );
+StyleSheet,
+View,
+ActivityIndicator,
+FlatList,
+Text,
+TouchableOpacity
+} from "react-native";
+export default class Source extends React.Component {
+static navigationOptions = ({ navigation }) => {
+return {
+  title: "Source Listing",
+  headerStyle: {backgroundColor: "#fff"},
+  headerTitleStyle: {textAlign: "center",flex: 1}
+ };
 };
-
+constructor(props) {
+ super(props);
+ this.state = {
+   loading: true,
+   dataSource:[]
+  };
+}
+componentDidMount(){
+fetch("https://ghibliapi.herokuapp.com/films/")
+.then(response => response.json())
+.then((responseJson)=> {
+  this.setState({
+   loading: false,
+   dataSource: responseJson
+  })
+})
+.catch(error=>console.log(error)) //to catch the errors if any
+}
+FlatListItemSeparator = () => {
+return (
+  <View style={{
+     height: .5,
+     width:"100%",
+     backgroundColor:"rgba(0,0,0,0.5)",
+}}
+/>
+);
+}
+renderItem=(data)=>
+<TouchableOpacity style={styles.list}>
+<Text style={styles.lightText}>{data.item.name}</Text>
+<Text style={styles.lightText}>{data.item.description}</Text>
+<Text style={styles.lightText}>{data.item.class}</Text></TouchableOpacity>
+render(){
+ if(this.state.loading){
+  return( 
+    <View style={styles.loader}> 
+      <ActivityIndicator size="large" color="#0c9"/>
+    </View>
+)}
+return(
+ <View style={styles.container}>
+ <FlatList
+    data= {this.state.dataSource}
+    ItemSeparatorComponent = {this.FlatListItemSeparator}
+    renderItem= {item=> this.renderItem(item)}
+    keyExtractor= {item=>item.id.toString()}
+ />
+</View>
+)}
+}
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff"
+   },
+  loader:{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff"
+   },
+  list:{
+    paddingVertical: 4,
+    margin: 5,
+    backgroundColor: "#fff"
+   }
 });
-
-export default App;
